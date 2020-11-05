@@ -5,12 +5,17 @@ import { schema as schemaBasic } from 'prosemirror-schema-basic'
 import { Schema } from 'prosemirror-model'
 import { EditorState } from 'prosemirror-state'
 
-const ProseView = () => {
+export type ProseViewProps = {
+  id: string
+  label: string
+  multiline?: boolean
+}
+
+const ProseView = ({ id, multiline = false }: ProseViewProps) => {
   const contentEditableDom = React.useRef(document.createElement('div'))
 
-  const multiline = false,
-    disableMarks = false
-
+  const disableMarks = false
+  console.log('running code again')
   const schema = new Schema({
     nodes: (schemaBasic.spec.nodes as any).update(
       'doc',
@@ -25,21 +30,20 @@ const ProseView = () => {
 
   const [view, setView] = React.useState<EditorView>()
 
-  React.useEffect(
-    () =>
+  React.useEffect(() => {
+    if (!view)
       setView(
         new EditorView(contentEditableDom.current, {
           state: editorState
         })
-      ),
-    [editorState]
-  )
+      )
+  }, [view, editorState])
 
   React.useEffect(() => {
     ;(window as any).view = view
   }, [view])
 
-  return <div ref={contentEditableDom}></div>
+  return <div id={id} ref={contentEditableDom}></div>
 }
 
 export default ProseView

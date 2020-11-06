@@ -4,18 +4,18 @@ describe('test default rich text box', () => {
   })
 
   it('enters simple text without delay', () => {
-    cy.get('#prosemirror-multiline')
+    cy.get('#prosemirror-multiline [contenteditable]')
       .type('hello world')
       .should('contain', 'hello world')
   })
 
-  it.skip('enters simple text with second word bolded', () => {
-    cy.get('#prosemirror-multiline')
+  it('enters simple text with second word bolded', () => {
+    cy.get('#prosemirror-multiline [contenteditable]')
       .type('hello {ctrl}b')
       .type('world')
       .should('contain', 'hello world')
 
-    cy.get('#prosemirror-multiline strong').should($bold =>
+    cy.get('#prosemirror-multiline [contenteditable] strong').should($bold =>
       expect($bold.text()).to.equal('world')
     )
     cy.contains('world').should('have.css', 'font-weight', '700')

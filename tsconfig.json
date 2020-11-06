@@ -5,6 +5,8 @@
     "module": "esnext",
     "lib": ["dom", "esnext"],
     "importHelpers": true,
+    "typeRoots": ["./typings"],
+    "types": ["@types/jest"],
     // output .d.ts declaration files for consumers
     "declaration": true,
     // output .js.map sourcemap files for consumers

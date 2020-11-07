@@ -1,6 +1,5 @@
 import * as React from 'react'
-// import applyDevTools from 'prosemirror-dev-tools';
-
+import 'prosemirror-menu/style/menu.css'
 import ReactProseMirror from '../src'
 
 // import { HASHTAG_SCHEMA_NODE_TYPE } from './components/tagging/model/taggingUtils';

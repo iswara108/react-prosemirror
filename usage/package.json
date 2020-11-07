@@ -6,7 +6,8 @@
   "scripts": {
     "start": "parcel index.html",
     "build": "parcel build index.html",
-    "test:cypress": "cypress run --config video=false"
+    "test:cypress": "cypress run --config video=false",
+    "test:cypress:open": "cypress open"
   },
   "dependencies": {
     "prosemirror-dev-tools": "^3.0.2",

@@ -7,7 +7,12 @@ import ReactProseMirror from '../src'
 function App() {
   return (
     <>
-      <ReactProseMirror id="prosemirror-multiline" label="description" />
+      <ReactProseMirror
+        id="prosemirror-multiline"
+        label="description"
+        multiline
+      />
+      <ReactProseMirror id="prosemirror-singleline" label="description" />
     </>
   )
 }

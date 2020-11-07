@@ -34,9 +34,7 @@ const ProseView = ({ id, multiline = false }: ProseViewProps) => {
       schema,
       doc: Node.fromJSON<typeof schema>(schema, {
         type: 'doc',
-        content: [
-          { type: 'paragraph', content: [{ type: 'text', text: 'Hi' }] }
-        ]
+        content: [{ type: 'paragraph' }]
       }),
       plugins: examplePlugins
     })

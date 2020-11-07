@@ -1,11 +1,12 @@
 {
-  "name": "example",
+  "name": "usage",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
     "start": "parcel index.html",
-    "build": "parcel build index.html"
+    "build": "parcel build index.html",
+    "test:cypress": "cypress run --config video=false"
   },
   "dependencies": {
     "prosemirror-dev-tools": "^3.0.2",

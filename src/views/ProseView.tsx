@@ -6,12 +6,13 @@ import { Node, Schema } from 'prosemirror-model'
 import { EditorState, Plugin, PluginKey } from 'prosemirror-state'
 import { exampleSetup } from 'prosemirror-example-setup'
 
+type onChangeType = (stringifiedNode: string) => void
 export type ProseViewProps = {
   id: string
   label: string
   multiline?: boolean
   value?: string | null
-  onChange?: (newValue: string) => void
+  onChange?: onChangeType
 }
 
 export function emptyDefaultDocument(schema: Schema) {
@@ -38,6 +39,16 @@ export function createSchema(
   })
 }
 
+const useSyncPlugin = (onChange: undefined | onChangeType) =>
+  onChange
+    ? new Plugin({
+        key: new PluginKey('Sync State Plugin'),
+        view: () => ({
+          update: view => onChange(JSON.stringify(view.state.doc))
+        })
+      })
+    : undefined
+
 const ProseView = ({
   id,
   multiline = false,
@@ -46,41 +57,26 @@ const ProseView = ({
   ...restProps
 }: ProseViewProps) => {
   const contentEditableDom = React.useRef(document.createElement('div'))
-  const disableMarks = false
-  console.log(multiline, disableMarks)
-  console.log('running code again')
 
-  const syncStatePlugin = new Plugin({
-    key: new PluginKey('Sync State Plugin'),
-    view: () => ({
-      update: view => {
-        // if (JSON.stringify(view.state) !== JSON.stringify(editorState)) {
-        onChange?.(JSON.stringify(view.state.doc))
-        // }
-      }
-    })
-  })
-  const examplePlugins = [
-    ...exampleSetup({ schema: schemaBasic }),
-    syncStatePlugin
-  ]
+  const syncStatePlugin = useSyncPlugin(onChange)
 
   const [view, setView] = React.useState<EditorView>()
 
-  React.useEffect(() => {
-    console.log('changed value to ', value?.toString())
-    if (value)
-      view?.update({
-        state: EditorState.create({
+  React.useLayoutEffect(() => {
+    if (value && value !== JSON.stringify(view?.state.doc)) {
+      console.log('changed value to ', value?.toString())
+      view?.updateState(
+        EditorState.create({
           schema: view.state.schema,
           doc: Node.fromJSON(schemaBasic!, JSON.parse(value)),
           plugins: view.state.plugins
         })
-      })
-  }, [value])
+      )
+    }
+  }, [value, view])
 
   // initialize view with state
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     console.log('aaa')
     if (!view) {
       setView(
@@ -88,20 +84,14 @@ const ProseView = ({
           state: EditorState.create({
             schema: schemaBasic,
             doc: emptyDefaultDocument(schemaBasic),
-            plugins: examplePlugins
+            plugins: exampleSetup({ schema: schemaBasic }).concat(
+              syncStatePlugin || []
+            )
           })
         })
       )
-      ;(window as any).view = view
     }
-  }, [view])
-
-  React.useLayoutEffect(() => {
-    console.log('state changed')
-  }, [view, view?.state, JSON.stringify(view?.state)])
-  React.useEffect(() => {
-    ;(window as any).view2 = view
-  }, [view])
+  }, [view, syncStatePlugin])
 
   return <div id={id} ref={contentEditableDom} {...restProps}></div>
 }

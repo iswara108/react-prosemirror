@@ -8,9 +8,22 @@ function App() {
   // const [value, setValue] = React.useState(emptyDefaultDocument(schema))
   const [value, setValue] = React.useState<string | null>(null)
   const [anothervalue, setanotherValue] = React.useState<number>(0)
-  React.useEffect(
-    () => console.log('outside value changed to ', anothervalue),
-    [anothervalue]
+  React.useEffect(() => console.log('outside value changed to ', value), [
+    value
+  ])
+  const onChange = React.useCallback(
+    (newDocument: string) => {
+      if (newDocument !== value) {
+        console.log(
+          'setting value from controlled 1 or 2 ',
+          newDocument,
+          'value is ',
+          value
+        )
+        setValue(newDocument)
+      }
+    },
+    [value]
   )
 
   return (
@@ -21,20 +34,13 @@ function App() {
         id="prosemirror-controlled-1"
         label="controlled-component"
         value={value}
-        onChange={(newDocument: string) => {
-          console.log('setting value from controlled 1 to', newDocument)
-          setanotherValue(anothervalue + 1)
-          setValue(newDocument)
-        }}
+        onChange={onChange}
       />
       <ReactProseMirror
         id="prosemirror-controlled-2"
         label="controlled-component"
         value={value}
-        onChange={(newDocument: typeof value) => {
-          console.log('setting value from controlled 2 ')
-          setValue(newDocument)
-        }}
+        onChange={onChange}
       />
       <button onClick={() => setanotherValue(anothervalue + 10)}>aaa</button>{' '}
     </>

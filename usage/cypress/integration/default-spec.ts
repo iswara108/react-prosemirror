@@ -104,6 +104,15 @@ describe('test default rich text box', () => {
   })
 
   it.skip('tests autofocus', () => {})
-  context.skip('controlled components', () => {})
-  context.skip('uncontrolled components', () => {})
+  context('controlled components', () => {
+    cy.get('#prosemirror-controlled-1 [contenteditable]').as('controlled-1')
+    cy.get('#prosemirror-controlled-2 [contenteditable]').as('controlled-2')
+
+    it('copies text automatically from one component to another', () => {
+      cy.get('@controlled-1')
+        .type('text')
+        .should('have.text', 'text')
+      cy.get('@controlled-2').should('have.text', 'text')
+    })
+  })
 })

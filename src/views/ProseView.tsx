@@ -50,50 +50,20 @@ const ProseView = ({
   console.log(multiline, disableMarks)
   console.log('running code again')
 
-  const schema = new Schema({
-    nodes: (schemaBasic.spec.nodes as any).update(
-      'doc',
-      multiline
-        ? (schemaBasic.spec.nodes as any).get('doc')
-        : { content: 'block' }
-    ),
-    marks: disableMarks ? undefined : schemaBasic.spec.marks
-  })
-
   const syncStatePlugin = new Plugin({
     key: new PluginKey('Sync State Plugin'),
     view: () => ({
       update: view => {
-        if (JSON.stringify(view.state) !== JSON.stringify(editorState)) {
-          onChange?.(JSON.stringify(view.state.doc))
-          dispatch({ type: 'setNewState', payload: view.state })
-        }
+        // if (JSON.stringify(view.state) !== JSON.stringify(editorState)) {
+        onChange?.(JSON.stringify(view.state.doc))
+        // }
       }
     })
   })
-  const examplePlugins = [...exampleSetup({ schema }), syncStatePlugin]
-  const initialState = EditorState.create<Schema>({
-    schema,
-    doc: emptyDefaultDocument(schema),
-    plugins: examplePlugins
-  })
-
-  type State = { editorState: EditorState }
-  type Action = { type: 'setNewState'; payload: EditorState }
-  function stateReducer(state: State, action: Action) {
-    switch (action.type) {
-      case 'setNewState': {
-        console.log('setting new state')
-        return { editorState: action.payload }
-      }
-      default:
-        return state
-    }
-  }
-
-  const [editorState, dispatch] = React.useReducer<
-    React.Reducer<State, Action>
-  >(stateReducer, { editorState: initialState })
+  const examplePlugins = [
+    ...exampleSetup({ schema: schemaBasic }),
+    syncStatePlugin
+  ]
 
   const [view, setView] = React.useState<EditorView>()
 
@@ -103,7 +73,7 @@ const ProseView = ({
       view?.update({
         state: EditorState.create({
           schema: view.state.schema,
-          doc: Node.fromJSON(schema, JSON.parse(value)),
+          doc: Node.fromJSON(schemaBasic!, JSON.parse(value)),
           plugins: view.state.plugins
         })
       })
@@ -115,12 +85,16 @@ const ProseView = ({
     if (!view) {
       setView(
         new EditorView(contentEditableDom.current, {
-          state: editorState.editorState
+          state: EditorState.create({
+            schema: schemaBasic,
+            doc: emptyDefaultDocument(schemaBasic),
+            plugins: examplePlugins
+          })
         })
       )
       ;(window as any).view = view
     }
-  }, [view, editorState])
+  }, [view])
 
   React.useLayoutEffect(() => {
     console.log('state changed')

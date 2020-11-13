@@ -5,4 +5,4 @@ export default (props: ProseViewProps) => {
   return <ProseView {...props} />
 }
 
-export { createSchema, emptyDefaultDocument } from './views/ProseView'
+export { createSchema, createEmptyDocument } from './views/ProseView'

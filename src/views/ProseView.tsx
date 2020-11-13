@@ -11,6 +11,7 @@ export type ProseViewProps = {
   id: string
   label: string
   multiline?: boolean
+  disableMarks?: boolean
   value?: string | null
   onChange?: onChangeType
 }
@@ -38,6 +39,7 @@ const ProseView = ({
   multiline = false,
   value,
   onChange,
+  disableMarks = false,
   ...restProps
 }: ProseViewProps) => {
   const [view, setView] = React.useState<EditorView>()
@@ -45,12 +47,14 @@ const ProseView = ({
   const syncStatePlugin = useSyncPlugin(onChange)
   const previousValue = usePrevious(value)
 
+  const schema = createSchema({ multiline, disableMarks })
+
   React.useLayoutEffect(() => {
     if (value && value !== JSON.stringify(view?.state.doc)) {
       view?.updateState(
         EditorState.create({
           schema: view.state.schema,
-          doc: Node.fromJSON(schemaBasic!, JSON.parse(value)),
+          doc: Node.fromJSON(schema!, JSON.parse(value)),
           plugins: view.state.plugins.slice(0, -1).concat(syncStatePlugin || [])
         })
       )
@@ -70,9 +74,9 @@ const ProseView = ({
       setView(
         new EditorView(contentEditableDom.current, {
           state: EditorState.create({
-            schema: schemaBasic,
-            doc: createEmptyDocument(schemaBasic),
-            plugins: exampleSetup({ schema: schemaBasic }).concat(
+            schema: schema,
+            doc: createEmptyDocument(schema),
+            plugins: exampleSetup({ schema: schema }).concat(
               syncStatePlugin || []
             )
           })

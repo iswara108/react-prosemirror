@@ -7,6 +7,12 @@ function App() {
     <>
       <ReactProseMirror id="prosemirror-multiline" label="" multiline />
       <ReactProseMirror id="prosemirror-singleline" label="" />
+      <ReactProseMirror
+        id="prosemirror-no-marks-multiline"
+        label=""
+        disableMarks
+        multiline
+      />
       <ControlledMirros />
     </>
   )

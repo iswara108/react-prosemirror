@@ -28,12 +28,14 @@ function ControlledMirros() {
         label="controlled-component"
         value={value}
         onChange={setValue}
+        // multiline
       />
       <ReactProseMirror
         id="prosemirror-controlled-2"
         label="controlled-component"
         value={value}
         onChange={setValue}
+        // multiline
       />
     </>
   )

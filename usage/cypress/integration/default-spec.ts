@@ -21,6 +21,18 @@ describe('test default rich text box', () => {
     cy.contains('world').should('have.css', 'font-weight', '700')
   })
 
+  it('checks component without marks allowed', () => {
+    cy.get('#prosemirror-no-marks-multiline [contenteditable]')
+      .type('hello {ctrl}b')
+      .type('world')
+      .should('contain', 'hello world')
+
+    cy.get('#prosemirror-no-marks-multiline [contenteditable] strong').should(
+      'not.exist'
+    )
+    cy.contains('world').should('have.css', 'font-weight', '400')
+  })
+
   context('partial marks', () => {
     const testPartialSelectionMarks = (first: string, second: string) => {
       const NORMAL_WEIGHT = '400'
@@ -104,9 +116,12 @@ describe('test default rich text box', () => {
   })
 
   it.skip('tests autofocus', () => {})
+
   context('controlled components', () => {
-    cy.get('#prosemirror-controlled-1 [contenteditable]').as('controlled-1')
-    cy.get('#prosemirror-controlled-2 [contenteditable]').as('controlled-2')
+    beforeEach(() => {
+      cy.get('#prosemirror-controlled-1 [contenteditable]').as('controlled-1')
+      cy.get('#prosemirror-controlled-2 [contenteditable]').as('controlled-2')
+    })
 
     it('copies text automatically from one component to another', () => {
       cy.get('@controlled-1')

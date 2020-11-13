@@ -1,18 +1,18 @@
 import * as React from 'react'
 import { EditorView } from 'prosemirror-view'
 import 'prosemirror-view/style/prosemirror.css'
-import { schema as schemaBasic } from 'prosemirror-schema-basic'
 import { Node, Schema } from 'prosemirror-model'
 import { EditorState, Plugin, PluginKey } from 'prosemirror-state'
 import { exampleSetup } from 'prosemirror-example-setup'
 import usePrevious from 'use-previous'
+import { useDefaultSchema } from '../schemas/defaultSchema'
 
 export type ProseViewProps = {
   id: string
   label: string
-  multiline?: boolean
   value?: string | null
   onChange?: onChangeType
+  schema?: Schema
 }
 
 // controlled component's "onChange" prop type
@@ -33,29 +33,30 @@ const useSyncPlugin = (onChange: undefined | onChangeType) =>
       })
     : undefined
 
-const ProseView = ({
-  id,
-  multiline = false,
-  value,
-  onChange,
-  ...restProps
-}: ProseViewProps) => {
+const ProseView = (props: ProseViewProps) => {
+  const { id, value, onChange, ...restProps } = props
   const [view, setView] = React.useState<EditorView>()
   const contentEditableDom = React.useRef(document.createElement('div'))
   const syncStatePlugin = useSyncPlugin(onChange)
   const previousValue = usePrevious(value)
+
+  const defaultSchema = useDefaultSchema({
+    multiline: false,
+    disableMarks: true
+  })
+  const schema = props.schema || defaultSchema
 
   React.useLayoutEffect(() => {
     if (value && value !== JSON.stringify(view?.state.doc)) {
       view?.updateState(
         EditorState.create({
           schema: view.state.schema,
-          doc: Node.fromJSON(schemaBasic!, JSON.parse(value)),
+          doc: Node.fromJSON(schema!, JSON.parse(value)),
           plugins: view.state.plugins.slice(0, -1).concat(syncStatePlugin || [])
         })
       )
     }
-  }, [value, view, syncStatePlugin])
+  }, [value, view, syncStatePlugin, schema])
 
   React.useLayoutEffect(() => {
     if (value && value !== previousValue)
@@ -70,16 +71,16 @@ const ProseView = ({
       setView(
         new EditorView(contentEditableDom.current, {
           state: EditorState.create({
-            schema: schemaBasic,
-            doc: createEmptyDocument(schemaBasic),
-            plugins: exampleSetup({ schema: schemaBasic }).concat(
+            schema: schema,
+            doc: createEmptyDocument(schema),
+            plugins: exampleSetup({ schema: schema }).concat(
               syncStatePlugin || []
             )
           })
         })
       )
     }
-  }, [view, syncStatePlugin])
+  }, [view, syncStatePlugin, schema])
 
   return <div id={id} ref={contentEditableDom} {...restProps}></div>
 }
@@ -88,23 +89,6 @@ export function createEmptyDocument(schema: Schema) {
   return Node.fromJSON<Schema>(schema, {
     type: 'doc',
     content: [{ type: 'paragraph' }]
-  })
-}
-
-export function createSchema(
-  options: { multiline: boolean; disableMarks: boolean } = {
-    multiline: true,
-    disableMarks: false
-  }
-): Schema {
-  return new Schema({
-    nodes: (schemaBasic.spec.nodes as any).update(
-      'doc',
-      options.multiline
-        ? (schemaBasic.spec.nodes as any).get('doc')
-        : { content: 'block' }
-    ),
-    marks: options.disableMarks ? undefined : schemaBasic.spec.marks
   })
 }
 

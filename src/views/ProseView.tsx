@@ -5,6 +5,7 @@ import { schema as schemaBasic } from 'prosemirror-schema-basic'
 import { Node, Schema } from 'prosemirror-model'
 import { EditorState, Plugin, PluginKey } from 'prosemirror-state'
 import { exampleSetup } from 'prosemirror-example-setup'
+import usePrevious from 'use-previous'
 
 type onChangeType = (stringifiedNode: string) => void
 export type ProseViewProps = {
@@ -39,15 +40,26 @@ export function createSchema(
   })
 }
 
-const useSyncPlugin = (onChange: undefined | onChangeType) =>
-  onChange
-    ? new Plugin({
-        key: new PluginKey('Sync State Plugin'),
+function counting(onChange: undefined | onChangeType, i: number) {
+  return onChange
+    ? new Plugin<{ value: string }>({
+        key: new PluginKey('Sync State Plugin ' + i.toString()),
         view: () => ({
-          update: view => onChange(JSON.stringify(view.state.doc))
+          update: (view, prevState) => {
+            console.log('in update')
+            if (!prevState.doc.eq(view.state.doc)) {
+              console.log('really updating')
+              onChange(JSON.stringify(view.state.doc))
+            }
+          }
         })
       })
     : undefined
+}
+let i = 0
+// this plugin needs to be the last one defined, to capture the last state on a sequence of plugin intervention
+const useSyncPlugin = (onChange: undefined | onChangeType) =>
+  counting(onChange, i++)
 
 const ProseView = ({
   id,
@@ -61,6 +73,7 @@ const ProseView = ({
   const syncStatePlugin = useSyncPlugin(onChange)
 
   const [view, setView] = React.useState<EditorView>()
+  const previousValue = usePrevious(value)
 
   React.useLayoutEffect(() => {
     if (value && value !== JSON.stringify(view?.state.doc)) {
@@ -69,11 +82,19 @@ const ProseView = ({
         EditorState.create({
           schema: view.state.schema,
           doc: Node.fromJSON(schemaBasic!, JSON.parse(value)),
-          plugins: view.state.plugins
+          plugins: view.state.plugins.slice(0, -1).concat(syncStatePlugin || [])
         })
       )
     }
-  }, [value, view])
+  }, [value, view, syncStatePlugin])
+
+  React.useLayoutEffect(() => {
+    console.log('value', value, 'prev', previousValue)
+    if (value && value !== previousValue)
+      view?.state.reconfigure({
+        plugins: view.state.plugins.slice(0, -1).concat(syncStatePlugin || [])
+      })
+  }, [value, syncStatePlugin, previousValue, view])
 
   // initialize view with state
   React.useLayoutEffect(() => {
@@ -93,6 +114,9 @@ const ProseView = ({
     }
   }, [view, syncStatePlugin])
 
+  React.useEffect(() => {
+    if (view) (window as any).view = view
+  }, [view])
   return <div id={id} ref={contentEditableDom} {...restProps}></div>
 }
 

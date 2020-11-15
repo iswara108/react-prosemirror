@@ -52,11 +52,6 @@ const ProseView = (props: ProseViewProps) => {
     }
   }, [view, syncStatePlugin, schema, disableEdit])
 
-  React.useEffect(() => {
-    if (view && disableEdit) {
-      ;(window as any).view = view
-    }
-  }, [view, disableEdit])
   // refresh the view with a new state whenever the value prop changes
   React.useLayoutEffect(() => {
     if (value && value !== JSON.stringify(view?.state.doc)) {

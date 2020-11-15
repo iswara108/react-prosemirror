@@ -25,7 +25,34 @@ function App() {
         id="prosemirror-disable-edit"
         label=""
         disableEdit
-        value='{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"I cannot be changed"}]}]}'
+        value={`
+        {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "I "
+                },
+                {
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "strong"
+                    }
+                  ],
+                  "text": "cannot"
+                },
+                {
+                  "type": "text",
+                  "text": " be changed"
+                }
+              ]
+            }
+          ]
+        }`}
       />
 
       <ControlledMirros />
@@ -36,9 +63,11 @@ function App() {
 function ControlledMirros() {
   const [value, setValue] = React.useState<string | null>(null)
   const schema = useDefaultSchema()
-  React.useEffect(() => console.log(value), [value])
+  React.useEffect(
+    () => console.log("controlled mirrored components' value changed: ", value),
+    [value]
+  )
 
-  React.useEffect(() => console.log('controlled schema changed'), [schema])
   return (
     <>
       <ReactProseMirror

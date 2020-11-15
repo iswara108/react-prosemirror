@@ -117,22 +117,42 @@ describe('test default rich text box', () => {
 
   it.skip('tests autofocus', () => {})
 
+  it('disallows editing', () => {
+    cy.get('#prosemirror-disable-edit [contenteditable]')
+      .contains(/^I cannot be changed$/)
+      .type('{end} really?')
+      .contains(/^I cannot be changed$/)
+  })
+
   context('controlled components', () => {
     beforeEach(() => {
       cy.get('#prosemirror-controlled-1 [contenteditable]').as('controlled-1')
       cy.get('#prosemirror-controlled-2 [contenteditable]').as('controlled-2')
+      cy.get('#prosemirror-controlled-3 [contenteditable]').as('controlled-3')
     })
 
     it('copies text automatically from one component to another', () => {
       cy.get('@controlled-1')
         .type('text')
-        .should('have.text', 'text')
-      cy.get('@controlled-2').should('have.text', 'text')
+        .contains(/^text$/)
+      cy.get('@controlled-2').contains(/^text$/)
 
       cy.get('@controlled-2')
         .type('{end} 123')
-        .should('have.text', 'text 123')
-      cy.get('@controlled-1').should('have.text', 'text 123')
+        .contains(/^text 123$/)
+      cy.get('@controlled-1').contains(/^text 123$/)
+    })
+
+    it('disabled-text component is updated but cannot change itself', () => {
+      cy.get('@controlled-1')
+        .type('text')
+        .contains(/^text$/)
+      cy.get('@controlled-3').contains(/^text$/)
+
+      cy.get('@controlled-3')
+        .type('{end} 123')
+        .contains(/^text$/)
+      cy.get('@controlled-1').contains(/^text$/)
     })
   })
 })

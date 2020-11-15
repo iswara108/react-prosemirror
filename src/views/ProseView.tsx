@@ -18,7 +18,10 @@ export type ProseViewProps = {
   disableEdit?: boolean
 }
 
-const ProseView = (props: ProseViewProps) => {
+const ProseView = React.forwardRef(function ProseView(
+  props: ProseViewProps,
+  ref
+) {
   const { id, value, onChange, disableEdit, ...restProps } = props
   const [view, setView] = React.useState<EditorView>()
   const contentEditableDom = React.useRef(document.createElement('div'))
@@ -43,8 +46,14 @@ const ProseView = (props: ProseViewProps) => {
     }
   }, [view, syncStatePlugin, schema, disableEdit])
 
+  // set the ref object to the prosemirror editorView
+  React.useEffect(() => {
+    if (view && ref) {
+      ;(ref as React.MutableRefObject<EditorView>).current = view
+    }
+  }, [view, ref])
   return <div id={id} ref={contentEditableDom} {...restProps}></div>
-}
+})
 
 export function createEmptyDocument(schema: Schema) {
   return Node.fromJSON<Schema>(schema, {

@@ -2,10 +2,14 @@ import * as React from 'react'
 import 'prosemirror-menu/style/menu.css'
 import ReactProseMirror from '../src'
 import { useDefaultSchema } from '../src/schemas/defaultSchema'
+import { unchangedText } from './lib/unchangedText'
+import { EditorView } from 'prosemirror-view'
 
 function App() {
   const singlelineSchema = useDefaultSchema({ multiline: false })
   const noMarksSchema = useDefaultSchema({ disableMarks: true })
+
+  const ref = React.useRef<EditorView>()
 
   return (
     <>
@@ -25,37 +29,13 @@ function App() {
         id="prosemirror-disable-edit"
         label=""
         disableEdit
-        value={`
-        {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "I "
-                },
-                {
-                  "type": "text",
-                  "marks": [
-                    {
-                      "type": "strong"
-                    }
-                  ],
-                  "text": "cannot"
-                },
-                {
-                  "type": "text",
-                  "text": " be changed"
-                }
-              ]
-            }
-          ]
-        }`}
+        value={unchangedText}
       />
 
       <ControlledMirros />
+
+      <ReactProseMirror id="prosemirror-ref" label="" ref={ref} />
+      <button onClick={() => console.log(ref.current)}>Print ref</button>
     </>
   )
 }

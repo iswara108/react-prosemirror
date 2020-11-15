@@ -4,9 +4,8 @@ import 'prosemirror-view/style/prosemirror.css'
 import { Node, Schema } from 'prosemirror-model'
 import { EditorState } from 'prosemirror-state'
 import { exampleSetup } from 'prosemirror-example-setup'
-import usePrevious from 'use-previous'
 import { useDefaultSchema } from '../schemas/defaultSchema'
-import { useSyncPlugin } from '../plugins/syncStatePlugin'
+import { useSyncPlugin, onChangeType } from '../plugins/syncStatePlugin'
 
 export type ProseViewProps = {
   id: string
@@ -16,38 +15,23 @@ export type ProseViewProps = {
   schema?: Schema
 }
 
-// controlled component's "onChange" prop type
-export type onChangeType = (stringifiedNode: string) => void
-
 const ProseView = (props: ProseViewProps) => {
   const { id, value, onChange, ...restProps } = props
-
   const [view, setView] = React.useState<EditorView>()
   const contentEditableDom = React.useRef(document.createElement('div'))
-  const syncStatePlugin = useSyncPlugin(onChange)
-  const previousValue = usePrevious(value)
-
   const defaultSchema = useDefaultSchema()
   const schema = props.schema || defaultSchema
 
-  React.useLayoutEffect(() => {
-    if (value && value !== JSON.stringify(view?.state.doc)) {
-      view?.updateState(
-        EditorState.create({
-          schema: view.state.schema,
-          doc: Node.fromJSON(schema!, JSON.parse(value)),
-          plugins: view.state.plugins.slice(0, -1).concat(syncStatePlugin || [])
-        })
-      )
-    }
-  }, [value, view, syncStatePlugin, schema])
+  // create a sync plugin which calls a callback prop whenever the view changes.
+  // pass ref callback which is updated when the onChange prop is renewed.
+  const refOnChange = React.useRef((val: string) => onChange?.(val))
+  const syncStatePlugin = useSyncPlugin(refOnChange)
 
-  React.useLayoutEffect(() => {
-    if (value && value !== previousValue)
-      view?.state.reconfigure({
-        plugins: view.state.plugins.slice(0, -1).concat(syncStatePlugin || [])
-      })
-  }, [value, syncStatePlugin, previousValue, view])
+  // update refOnChange's current value to the onChange callback.
+  // the refOnChange object is passed by reference to the sync plugin during initialization
+  React.useEffect(() => {
+    refOnChange.current = (val: string) => onChange?.(val)
+  }, [onChange])
 
   // initialize view with state
   React.useLayoutEffect(() => {
@@ -57,9 +41,7 @@ const ProseView = (props: ProseViewProps) => {
           state: EditorState.create({
             schema: schema,
             doc: createEmptyDocument(schema),
-            plugins: exampleSetup({ schema: schema }).concat(
-              syncStatePlugin || []
-            )
+            plugins: exampleSetup({ schema: schema }).concat(syncStatePlugin)
           })
         })
       )
@@ -70,31 +52,19 @@ const ProseView = (props: ProseViewProps) => {
   React.useLayoutEffect(() => {
     if (value && value !== JSON.stringify(view?.state.doc)) {
       try {
-        const doc = Node.fromJSON(schema, JSON.parse(value))
-        // doc.check()
-
+        // todo: change to apply transaction and replace the contents (instead of recreating the whole state)
         view?.updateState(
           EditorState.create({
             schema: view.state.schema,
-            doc,
+            doc: Node.fromJSON(schema, JSON.parse(value)),
             plugins: view.state.plugins
-              .slice(0, -1)
-              .concat(syncStatePlugin || [])
           })
         )
       } catch (e) {
         console.error(e)
       }
     }
-  }, [value, view, syncStatePlugin, schema])
-
-  // refresh the syncStatePlugin whenever the value changes
-  React.useLayoutEffect(() => {
-    if (value && value !== previousValue)
-      view?.state.reconfigure({
-        plugins: view.state.plugins.slice(0, -1).concat(syncStatePlugin || [])
-      })
-  }, [value, syncStatePlugin, previousValue, view])
+  }, [value, view, schema])
 
   return <div id={id} ref={contentEditableDom} {...restProps}></div>
 }

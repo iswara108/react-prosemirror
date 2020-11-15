@@ -20,6 +20,14 @@ function App() {
         label=""
         schema={noMarksSchema}
       />
+
+      <ReactProseMirror
+        id="prosemirror-disable-edit"
+        label=""
+        disableEdit
+        value='{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"I cannot be changed"}]}]}'
+      />
+
       <ControlledMirros />
     </>
   )
@@ -28,7 +36,7 @@ function App() {
 function ControlledMirros() {
   const [value, setValue] = React.useState<string | null>(null)
   const schema = useDefaultSchema()
-  // const [schema] = React.useState(useDefaultSchema())
+  React.useEffect(() => console.log(value), [value])
 
   React.useEffect(() => console.log('controlled schema changed'), [schema])
   return (
@@ -39,7 +47,6 @@ function ControlledMirros() {
         value={value}
         schema={schema}
         onChange={setValue}
-        // multiline
       />
       <ReactProseMirror
         id="prosemirror-controlled-2"
@@ -47,7 +54,13 @@ function ControlledMirros() {
         value={value}
         schema={schema}
         onChange={setValue}
-        // multiline
+      />
+      <ReactProseMirror
+        id="prosemirror-controlled-3"
+        label="controlled-component"
+        value={value}
+        schema={schema}
+        disableEdit
       />
     </>
   )

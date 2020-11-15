@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Plugin, PluginKey } from 'prosemirror-state'
 
 // controlled component's "onChange" prop type
-export type onChangeType = (stringifiedNode: string) => void
+export type onChangeType = undefined | ((stringifiedNode: string) => void)
 
 // fires an "onChange" callback whenever the prosemirror view is updated.
 // this is necessary for controlled components.

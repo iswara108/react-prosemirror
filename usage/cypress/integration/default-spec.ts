@@ -128,6 +128,11 @@ describe('test default rich text box', () => {
         .type('text')
         .should('have.text', 'text')
       cy.get('@controlled-2').should('have.text', 'text')
+
+      cy.get('@controlled-2')
+        .type('{end} 123')
+        .should('have.text', 'text 123')
+      cy.get('@controlled-1').should('have.text', 'text 123')
     })
   })
 })

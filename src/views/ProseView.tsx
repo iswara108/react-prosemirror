@@ -6,6 +6,7 @@ import { EditorState } from 'prosemirror-state'
 import { exampleSetup } from 'prosemirror-example-setup'
 import { useDefaultSchema } from '../schemas/defaultSchema'
 import { useSyncPlugin, onChangeType } from '../plugins/syncStatePlugin'
+import { readOnlyPlugin } from '../plugins/readOnlyPlugin'
 
 export type ProseViewProps = {
   id: string
@@ -13,10 +14,11 @@ export type ProseViewProps = {
   value?: string | null
   onChange?: onChangeType
   schema?: Schema
+  disableEdit?: boolean
 }
 
 const ProseView = (props: ProseViewProps) => {
-  const { id, value, onChange, ...restProps } = props
+  const { id, value, onChange, disableEdit, ...restProps } = props
   const [view, setView] = React.useState<EditorView>()
   const contentEditableDom = React.useRef(document.createElement('div'))
   const defaultSchema = useDefaultSchema()
@@ -41,13 +43,20 @@ const ProseView = (props: ProseViewProps) => {
           state: EditorState.create({
             schema: schema,
             doc: createEmptyDocument(schema),
-            plugins: exampleSetup({ schema: schema }).concat(syncStatePlugin)
+            plugins: exampleSetup({ schema: schema })
+              .concat((disableEdit && readOnlyPlugin()) || [])
+              .concat(syncStatePlugin)
           })
         })
       )
     }
-  }, [view, syncStatePlugin, schema])
+  }, [view, syncStatePlugin, schema, disableEdit])
 
+  React.useEffect(() => {
+    if (view && disableEdit) {
+      ;(window as any).view = view
+    }
+  }, [view, disableEdit])
   // refresh the view with a new state whenever the value prop changes
   React.useLayoutEffect(() => {
     if (value && value !== JSON.stringify(view?.state.doc)) {

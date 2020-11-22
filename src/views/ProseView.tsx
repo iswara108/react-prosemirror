@@ -13,7 +13,7 @@ import useRefEditorView from '../hooks/EditorViewRef'
 export type ProseViewProps = {
   id: string
   label: string
-  value?: string | null
+  value?: { [key: string]: any } | null
   onChange?: onChangeType
   schema?: Schema
   readOnly?: boolean

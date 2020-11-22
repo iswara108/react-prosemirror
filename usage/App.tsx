@@ -2,7 +2,7 @@ import * as React from 'react'
 import 'prosemirror-menu/style/menu.css'
 import ReactProseMirror from '../src'
 import { useDefaultSchema } from '../src/schemas/defaultSchema'
-import { unchangedText } from './lib/unchangedText'
+import { unchangedTextDemoContent } from './lib/demoInitialContents'
 import { EditorView } from 'prosemirror-view'
 
 function App() {
@@ -27,7 +27,7 @@ function App() {
         id="prosemirror-disable-edit"
         label=""
         readOnly
-        value={unchangedText}
+        value={unchangedTextDemoContent}
       />
 
       <ControlledMirros />
@@ -49,7 +49,7 @@ function UncontrolledComponentWithRef() {
 }
 
 function ControlledMirros() {
-  const [value, setValue] = React.useState<string | null>(null)
+  const [value, setValue] = React.useState<{ [key: string]: any } | null>(null)
   const schema = useDefaultSchema()
   React.useEffect(
     () => console.log("controlled mirrored components' value changed: ", value),

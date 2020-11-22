@@ -1,8 +1,11 @@
 import * as React from 'react'
 import { Plugin, PluginKey } from 'prosemirror-state'
+// import { Node } from 'prosemirror-model'
 
 // controlled component's "onChange" prop type
-export type onChangeType = undefined | ((stringifiedNode: string) => void)
+export type onChangeType =
+  | undefined
+  | ((jsonNode: { [key: string]: any }) => void)
 
 // fires an "onChange" callback whenever the prosemirror view is updated.
 // this is necessary for controlled components.
@@ -10,14 +13,16 @@ export type onChangeType = undefined | ((stringifiedNode: string) => void)
 // reference throughout the component's lifetime because it is passed to the
 // plugin in intialization.
 export const useSyncPlugin = (
-  onChange: React.MutableRefObject<(val: string) => void | undefined>
+  onChange: React.MutableRefObject<
+    (val: { [key: string]: any }) => void | undefined
+  >
 ) =>
   new Plugin<{ value: string }>({
     key: new PluginKey('Sync State Plugin'),
     view: () => ({
       update: (view, prevState) => {
         if (!prevState.doc.eq(view.state.doc)) {
-          onChange.current(JSON.stringify(view.state.doc))
+          onChange.current(view.state.doc.toJSON())
         }
       }
     })

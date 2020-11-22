@@ -19,6 +19,7 @@
     "scheduler/tracing": "../node_modules/scheduler/tracing-profiling"
   },
   "devDependencies": {
+    "@types/prosemirror-view": "^1.16.1",
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.8.4",
     "cypress": "^5.5.0",

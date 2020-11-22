@@ -1,5 +1,6 @@
 import * as React from 'react'
 import ProseView, { ProseViewProps } from './views/ProseView'
+import TaggingView, { TaggingViewProps } from './views/TaggingView'
 import { EditorView } from 'prosemirror-view'
 
 const ProseMirror = React.forwardRef<EditorView, ProseViewProps>(
@@ -8,4 +9,9 @@ const ProseMirror = React.forwardRef<EditorView, ProseViewProps>(
   }
 )
 
-export default ProseMirror
+const TaggingEditor = React.forwardRef<EditorView, TaggingViewProps>(
+  function TaggingEditor(props, ref) {
+    return <TaggingView {...props} ref={ref} />
+  }
+)
+export { ProseMirror, TaggingEditor }

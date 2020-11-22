@@ -1,8 +1,11 @@
 import * as React from 'react'
 import 'prosemirror-menu/style/menu.css'
-import ReactProseMirror from '../src'
+import { ProseMirror, TaggingEditor } from '../src'
 import { useDefaultSchema } from '../src/schemas/defaultSchema'
-import { unchangedTextDemoContent } from './lib/demoInitialContents'
+import {
+  taggingDemoContent,
+  unchangedTextDemoContent
+} from './lib/demoInitialContents'
 import { EditorView } from 'prosemirror-view'
 
 function App() {
@@ -11,19 +14,19 @@ function App() {
 
   return (
     <>
-      <ReactProseMirror id="prosemirror-multiline" label="" />
-      <ReactProseMirror
+      <ProseMirror id="prosemirror-multiline" label="" />
+      <ProseMirror
         id="prosemirror-singleline"
         label=""
         schema={singlelineSchema}
       />
-      <ReactProseMirror
+      <ProseMirror
         id="prosemirror-no-marks-multiline"
         label=""
         schema={noMarksSchema}
       />
 
-      <ReactProseMirror
+      <ProseMirror
         id="prosemirror-disable-edit"
         label=""
         readOnly
@@ -32,6 +35,11 @@ function App() {
 
       <ControlledMirros />
       <UncontrolledComponentWithRef />
+      <TaggingEditor
+        id="prosemirror-tagging-editor"
+        label=""
+        value={taggingDemoContent}
+      />
     </>
   )
 }
@@ -45,7 +53,7 @@ function UncontrolledComponentWithRef() {
     }, 0)
   }, [])
 
-  return <ReactProseMirror id="prosemirror-ref" label="" ref={editorViewRef} />
+  return <ProseMirror id="prosemirror-ref" label="" ref={editorViewRef} />
 }
 
 function ControlledMirros() {
@@ -58,21 +66,21 @@ function ControlledMirros() {
 
   return (
     <>
-      <ReactProseMirror
+      <ProseMirror
         id="prosemirror-controlled-1"
         label="controlled-component"
         value={value}
         schema={schema}
         onChange={setValue}
       />
-      <ReactProseMirror
+      <ProseMirror
         id="prosemirror-controlled-2"
         label="controlled-component"
         value={value}
         schema={schema}
         onChange={setValue}
       />
-      <ReactProseMirror
+      <ProseMirror
         id="prosemirror-controlled-3"
         label="controlled-component"
         value={value}

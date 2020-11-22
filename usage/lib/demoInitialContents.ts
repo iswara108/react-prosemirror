@@ -25,3 +25,26 @@ export const unchangedTextDemoContent = {
     }
   ]
 }
+
+export const taggingDemoContent = {
+  type: 'doc',
+  content: [
+    {
+      type: 'paragraph',
+      content: [
+        { type: 'text', text: 'here is a ' },
+        {
+          type: 'hashtag',
+          content: [{ type: 'text', text: '#hashtag' }]
+        },
+        { type: 'text', text: ' ' },
+        { type: 'text', text: 'and here is a ' },
+        {
+          type: 'mention',
+          content: [{ type: 'text', text: '@mention' }]
+        },
+        { type: 'text', text: ' ' }
+      ]
+    }
+  ]
+}

@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { EditorView } from 'prosemirror-view'
 import 'prosemirror-view/style/prosemirror.css'
-import styled from 'styled-components'
 import { Node, Schema } from 'prosemirror-model'
 import { EditorState } from 'prosemirror-state'
 import { exampleSetup } from 'prosemirror-example-setup'
+import styled from 'styled-components'
+
 import { useTaggingSchema } from '../schemas/taggingSchema'
 import { onChangeType } from '../plugins/syncStatePlugin'
 import { readOnlyPlugin } from '../plugins/readOnlyPlugin'

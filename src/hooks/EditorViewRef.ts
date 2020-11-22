@@ -2,7 +2,7 @@ import * as React from 'react'
 import { EditorView } from 'prosemirror-view'
 
 export default function useRefEditorView(
-  ref: React.MutableRefObject<EditorView>,
+  ref: React.MutableRefObject<EditorView> | undefined,
   view: EditorView | undefined
 ) {
   // set the ref object to the prosemirror editorView

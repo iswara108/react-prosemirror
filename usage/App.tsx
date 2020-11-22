@@ -9,8 +9,6 @@ function App() {
   const singlelineSchema = useDefaultSchema({ multiline: false })
   const noMarksSchema = useDefaultSchema({ disableMarks: true })
 
-  const ref = React.useRef<EditorView>()
-
   return (
     <>
       <ReactProseMirror id="prosemirror-multiline" label="" />
@@ -33,11 +31,21 @@ function App() {
       />
 
       <ControlledMirros />
-
-      <ReactProseMirror id="prosemirror-ref" label="" ref={ref} />
-      <button onClick={() => console.log(ref.current)}>Print ref</button>
+      <UncontrolledComponentWithRef />
     </>
   )
+}
+
+function UncontrolledComponentWithRef() {
+  const editorViewRef = React.createRef<EditorView>()
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      ;(window as any).editorView = editorViewRef.current!
+    }, 0)
+  }, [])
+
+  return <ReactProseMirror id="prosemirror-ref" label="" ref={editorViewRef} />
 }
 
 function ControlledMirros() {

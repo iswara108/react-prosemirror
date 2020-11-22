@@ -1,3 +1,5 @@
+import { EditorView } from 'prosemirror-view'
+
 describe('test default rich text box', () => {
   beforeEach(() => {
     cy.visit('/')
@@ -118,8 +120,10 @@ describe('test default rich text box', () => {
   it.skip('tests autofocus', () => {})
 
   it('disallows editing', () => {
-    cy.get('#prosemirror-disable-edit [contenteditable]')
-      .contains(/^I cannot be changed$/)
+    cy.get('#prosemirror-disable-edit [contenteditable]').as('readonly')
+
+    cy.get('@readonly').contains(/^I cannot be changed$/)
+    cy.get('@readonly')
       .type('{end} really?')
       .contains(/^I cannot be changed$/)
   })
@@ -154,5 +158,17 @@ describe('test default rich text box', () => {
         .contains(/^text$/)
       cy.get('@controlled-1').contains(/^text$/)
     })
+  })
+
+  it('enables direct access to the editorView with ref', () => {
+    cy.window()
+      .its('editorView')
+      .then((editorView: EditorView) => {
+        const transaction = editorView.state.tr
+
+        transaction.insertText('refs are working')
+        editorView.dispatch(transaction)
+      })
+      .then(() => cy.get('#prosemirror-ref').contains('refs are working'))
   })
 })

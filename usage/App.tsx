@@ -26,7 +26,7 @@ function App() {
       <ReactProseMirror
         id="prosemirror-disable-edit"
         label=""
-        disableEdit
+        readOnly
         value={unchangedText}
       />
 
@@ -77,7 +77,7 @@ function ControlledMirros() {
         label="controlled-component"
         value={value}
         schema={schema}
-        disableEdit
+        readOnly
       />
     </>
   )

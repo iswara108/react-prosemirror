@@ -16,12 +16,12 @@ export type ProseViewProps = {
   value?: string | null
   onChange?: onChangeType
   schema?: Schema
-  disableEdit?: boolean
+  readOnly?: boolean
 }
 
 const ProseView = React.forwardRef<EditorView, ProseViewProps>(
   function ProseView(props, ref) {
-    const { id, value, onChange, disableEdit, ...restProps } = props
+    const { id, value, onChange, readOnly, ...restProps } = props
     const [view, setView] = React.useState<EditorView>()
     const contentEditableDom = React.useRef(document.createElement('div'))
     const defaultSchema = useDefaultSchema()
@@ -35,7 +35,7 @@ const ProseView = React.forwardRef<EditorView, ProseViewProps>(
       if (!view) {
         const doc = createEmptyDocument(schema)
         const plugins = exampleSetup({ schema: schema })
-          .concat((disableEdit && readOnlyPlugin()) || [])
+          .concat((readOnly && readOnlyPlugin()) || [])
           .concat(syncStatePlugin)
 
         setView(
@@ -44,7 +44,7 @@ const ProseView = React.forwardRef<EditorView, ProseViewProps>(
           })
         )
       }
-    }, [view, syncStatePlugin, schema, disableEdit])
+    }, [view, syncStatePlugin, schema, readOnly])
 
     // Note: In the below line, contentEditableDom is set as ref of the div
     // and this has nothing to do with the "ref" forwarded from the parent.

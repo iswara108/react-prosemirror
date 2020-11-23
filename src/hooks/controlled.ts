@@ -15,15 +15,13 @@ export function useControlled(
 ) {
   // create a sync plugin which calls a callback prop whenever the view changes.
   // pass ref callback which is updated when the onChange prop is renewed.
-  const refOnChange = React.useRef((val: { [key: string]: any }) =>
-    onChange?.(val)
-  )
+  const refOnChange = React.useRef(onChange)
   const syncStatePlugin = useSyncPlugin(refOnChange)
 
   // update refOnChange's current value to the onChange callback.
   // the refOnChange object is passed by reference to the sync plugin during initialization
   React.useEffect(() => {
-    refOnChange.current = (val: { [key: string]: any }) => onChange?.(val)
+    refOnChange.current = onChange
   }, [onChange])
 
   // refresh the view with a new state whenever the value prop changes

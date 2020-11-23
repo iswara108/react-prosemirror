@@ -1,16 +1,11 @@
 import * as React from 'react'
-import { EditorView } from 'prosemirror-view'
-import 'prosemirror-view/style/prosemirror.css'
-import { Node, Schema } from 'prosemirror-model'
-import { EditorState } from 'prosemirror-state'
-import { exampleSetup } from 'prosemirror-example-setup'
 import styled from 'styled-components'
 
+import { EditorView } from 'prosemirror-view'
+import { Node, Schema } from 'prosemirror-model'
 import { useTaggingSchema } from '../schemas/taggingSchema'
-import { onChangeType } from '../plugins/syncStatePlugin'
-import { readOnlyPlugin } from '../plugins/readOnlyPlugin'
-import { useControlled } from '../hooks/controlled'
-import useRefEditorView from '../hooks/EditorViewRef'
+import { useProseState, onChangeType } from '../hooks/useProseState'
+import { useProseView } from '../hooks/useProseView'
 
 const StyledDiv = styled.div`
   .editing-hashtag {
@@ -55,29 +50,17 @@ export type TaggingViewProps = {
 const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
   function TaggingView(props, ref) {
     const { id, value, onChange, readOnly, ...restProps } = props
-    const [view, setView] = React.useState<EditorView>()
-    const contentEditableDom = React.useRef(document.createElement('div'))
+
     const defaultTaggingSchema = useTaggingSchema()
     const schema = props.schema || defaultTaggingSchema
 
-    const syncStatePlugin = useControlled(value, onChange, view, schema)
-    useRefEditorView(ref as React.MutableRefObject<EditorView>, view)
+    const editorState = useProseState(onChange, schema, !!readOnly)
 
-    // initialize view with state
-    React.useLayoutEffect(() => {
-      if (!view) {
-        const doc = createEmptyDocument(schema)
-        const plugins = exampleSetup({ schema: schema })
-          .concat((readOnly && readOnlyPlugin()) || [])
-          .concat(syncStatePlugin)
-
-        setView(
-          new EditorView(contentEditableDom.current, {
-            state: EditorState.create({ schema, doc, plugins })
-          })
-        )
-      }
-    }, [view, syncStatePlugin, schema, readOnly])
+    const contentEditableDom = useProseView(
+      value,
+      editorState,
+      ref as React.MutableRefObject<EditorView>
+    )
 
     // Note: In the below line, contentEditableDom is set as ref of the div
     // and this has nothing to do with the "ref" forwarded from the parent.

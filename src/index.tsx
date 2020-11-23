@@ -14,4 +14,5 @@ const TaggingEditor = React.forwardRef<EditorView, TaggingViewProps>(
     return <TaggingView {...props} ref={ref} />
   }
 )
+
 export { ProseMirror, TaggingEditor }

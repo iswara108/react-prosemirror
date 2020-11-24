@@ -7,10 +7,21 @@ import {
   unchangedTextDemoContent
 } from './lib/demoInitialContents'
 import { EditorView } from 'prosemirror-view'
+import applyDevTools from 'prosemirror-dev-tools'
 
 function App() {
   const singlelineSchema = useDefaultSchema({ multiline: false })
   const noMarksSchema = useDefaultSchema({ disableMarks: true })
+  const tagRef = React.createRef<EditorView>()
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      if (tagRef.current) applyDevTools(tagRef.current)
+      ;(window as Window & {
+        tagView?: EditorView
+      }).tagView = tagRef.current!
+    }, 0)
+  }, [])
 
   return (
     <>
@@ -34,24 +45,27 @@ function App() {
       />
 
       <ControlledMirros />
-      <UncontrolledComponentWithRef />
+      <ComponentWithRef />
       <TaggingEditor
         id="prosemirror-tagging-editor"
         label=""
         value={taggingDemoContent}
+        ref={tagRef}
       />
     </>
   )
 }
 
-function UncontrolledComponentWithRef() {
+function ComponentWithRef() {
   const editorViewRef = React.createRef<EditorView>()
 
   React.useEffect(() => {
     setTimeout(() => {
-      ;(window as any).editorView = editorViewRef.current!
+      ;(window as Window & {
+        editorView?: EditorView
+      }).editorView = editorViewRef.current!
     }, 0)
-  }, [])
+  }, [editorViewRef])
 
   return <ProseMirror id="prosemirror-ref" label="" ref={editorViewRef} />
 }

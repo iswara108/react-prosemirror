@@ -63,8 +63,9 @@ const createImmutablePlugin = (immutableNodeTypes: string[]) =>
       }
     },
 
-    // constructs an array of all tags in the current state,
-    // and a parallel array from the new transcation,
+    // for any change in the document (namely - transaction),
+    // construct an array of all tags in the current state,
+    // and a parallel array of tags from the new transcation,
     // and compares both while considering position mapping if the tag's
     // position is changed in a transaction.
     // If both original and new tags exist but their content is not identical -

@@ -16,7 +16,8 @@ export type onChangeType =
 export function useProseState(
   onChange: onChangeType,
   schema: Schema,
-  readOnly: boolean
+  readOnly: boolean,
+  additionalPlugins: Plugin[] = []
 ) {
   // create a sync plugin which calls a callback prop whenever the view changes.
   // pass ref callback which is updated when the onChange prop is renewed.
@@ -29,6 +30,7 @@ export function useProseState(
   }, [onChange])
 
   const plugins = exampleSetup({ schema })
+    .concat(additionalPlugins)
     .concat((readOnly && readOnlyPlugin()) || [])
     .concat(syncStatePlugin(refOnChange))
 

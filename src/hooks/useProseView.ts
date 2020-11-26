@@ -46,7 +46,7 @@ export function useProseView(
     }
   }, [value, view])
 
-  // for uncontrolled prop:
+  // for forwarding editorView as ref:
   // set the ref object to the prosemirror editorView
   // This will make the editorView accessible to the parent.
   React.useEffect(() => {

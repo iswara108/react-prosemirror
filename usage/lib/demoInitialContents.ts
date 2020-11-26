@@ -37,8 +37,7 @@ export const taggingDemoContent = {
           type: 'hashtag',
           content: [{ type: 'text', text: '#hashtag' }]
         },
-        { type: 'text', text: ' ' },
-        { type: 'text', text: 'and here is a ' },
+        { type: 'text', text: ' and here is a ' },
         {
           type: 'mention',
           content: [{ type: 'text', text: '@mention' }]

@@ -2,10 +2,11 @@ import * as React from 'react'
 import styled from 'styled-components'
 
 import { EditorView } from 'prosemirror-view'
-import { Node, Schema } from 'prosemirror-model'
+import { Schema } from 'prosemirror-model'
 import { useTaggingSchema } from '../schemas/taggingSchema'
-import { useProseState, onChangeType } from '../hooks/useProseState'
+import { onChangeType } from '../hooks/useProseState'
 import { useProseView } from '../hooks/useProseView'
+import useTaggingState from '../hooks/useTaggingState'
 
 const StyledDiv = styled.div`
   .editing-hashtag {
@@ -54,7 +55,7 @@ const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
     const defaultTaggingSchema = useTaggingSchema()
     const schema = props.schema || defaultTaggingSchema
 
-    const editorState = useProseState(onChange, schema, !!readOnly)
+    const editorState = useTaggingState(onChange, schema, !!readOnly)
 
     const contentEditableDom = useProseView(
       value,
@@ -69,12 +70,5 @@ const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
     )
   }
 )
-
-export function createEmptyDocument(schema: Schema) {
-  return Node.fromJSON<Schema>(schema, {
-    type: 'doc',
-    content: [{ type: 'paragraph' }]
-  })
-}
 
 export default TaggingView

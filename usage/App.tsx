@@ -56,6 +56,7 @@ function App() {
         value={value}
         onChange={setValue}
         ref={tagRef}
+        hashtags={['#computer', '#office']}
       />
     </>
   )

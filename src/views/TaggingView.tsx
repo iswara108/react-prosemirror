@@ -46,16 +46,22 @@ export type TaggingViewProps = {
   onChange?: onChangeType
   schema?: Schema
   readOnly?: boolean
+  hashtags?: string[]
 }
 
 const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
   function TaggingView(props, ref) {
-    const { id, value, onChange, readOnly, ...restProps } = props
+    const { id, value, onChange, readOnly, hashtags, ...restProps } = props
 
     const defaultTaggingSchema = useTaggingSchema()
     const schema = props.schema || defaultTaggingSchema
 
-    const editorState = useTaggingState(onChange, schema, !!readOnly)
+    const { editorState, suggestionState } = useTaggingState(
+      onChange,
+      schema,
+      !!readOnly,
+      hashtags
+    )
 
     const contentEditableDom = useProseView(
       value,
@@ -66,7 +72,17 @@ const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
     // Note: In the below line, contentEditableDom is set as ref of the div
     // and this has nothing to do with the "ref" forwarded from the parent.
     return (
-      <StyledDiv id={id} ref={contentEditableDom} {...restProps}></StyledDiv>
+      <>
+        <StyledDiv id={id} ref={contentEditableDom} {...restProps}></StyledDiv>
+        {suggestionState.potentialTag && <p>{suggestionState.potentialTag}</p>}
+        {suggestionState.hashtagSuggestions && (
+          <ul>
+            {suggestionState.hashtagSuggestions.map(suggestion => (
+              <li key={suggestion}>{suggestion}</li>
+            ))}
+          </ul>
+        )}
+      </>
     )
   }
 )

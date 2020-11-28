@@ -7,6 +7,7 @@ import { useTaggingSchema } from '../schemas/taggingSchema'
 import { onChangeType } from '../hooks/useProseState'
 import { useProseView } from '../hooks/useProseView'
 import useTaggingState from '../hooks/useTaggingState'
+import { Suggestions } from './Suggestions'
 
 const StyledDiv = styled.div`
   .editing-hashtag {
@@ -56,12 +57,11 @@ const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
     const defaultTaggingSchema = useTaggingSchema()
     const schema = props.schema || defaultTaggingSchema
 
-    const { editorState, suggestionState } = useTaggingState(
-      onChange,
-      schema,
-      !!readOnly,
-      hashtags
-    )
+    const {
+      editorState,
+      suggestionState,
+      suggestionDispatch
+    } = useTaggingState(onChange, schema, !!readOnly, hashtags)
 
     const contentEditableDom = useProseView(
       value,
@@ -74,13 +74,11 @@ const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
     return (
       <>
         <StyledDiv id={id} ref={contentEditableDom} {...restProps}></StyledDiv>
-        {suggestionState.potentialTag && <p>{suggestionState.potentialTag}</p>}
         {suggestionState.hashtagSuggestions && (
-          <ul>
-            {suggestionState.hashtagSuggestions.map(suggestion => (
-              <li key={suggestion}>{suggestion}</li>
-            ))}
-          </ul>
+          <Suggestions
+            suggestionState={suggestionState}
+            suggestionDispatch={suggestionDispatch}
+          />
         )}
       </>
     )

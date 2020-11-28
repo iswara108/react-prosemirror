@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Schema } from 'prosemirror-model'
 import { EditorState } from 'prosemirror-state'
+import deburr from 'lodash/deburr'
 import { useProseState, onChangeType } from '../hooks/useProseState'
 import createImmutablePlugin from '../plugins/immutableNodePlugin'
 import potentialTagsPlugin from '../plugins/potentialTagPlugin'
@@ -18,13 +19,18 @@ export type SuggestionActionType =
   | { type: 'previous suggestions' }
   | { type: 'set suggestion'; payload: number }
   | { type: 'close tag suggestions' }
+  | { type: 'resolve tag'; payload: string }
 
 function useTaggingState(
   onChange: onChangeType,
   schema: Schema,
   readOnly: boolean,
   hashtags?: string[]
-): { editorState: EditorState; suggestionState: SuggestionStateType } {
+): {
+  editorState: EditorState
+  suggestionState: SuggestionStateType
+  suggestionDispatch: React.Dispatch<SuggestionActionType>
+} {
   const initialSuggestionState = {}
 
   function suggestionReducer(
@@ -36,16 +42,19 @@ function useTaggingState(
         return {
           ...state,
           potentialTag: action.payload,
-          hashtagSuggestions: hashtags?.filter(h => h.includes(action.payload))
+          hashtagSuggestions: getRelevantSuggestions(action.payload, hashtags)
         }
       case 'close tag suggestions':
         return {}
+      case 'resolve tag':
+        console.log('resolved to ', action.payload)
+        return {}
       default:
-        throw new Error()
+        throw new Error('case of ' + action.type + ' is not implemented')
     }
   }
 
-  const [suggestionState, dispatchSuggestion] = React.useReducer(
+  const [suggestionState, suggestionDispatch] = React.useReducer(
     suggestionReducer,
     initialSuggestionState
   )
@@ -57,12 +66,12 @@ function useTaggingState(
     )
 
     if (potentialHashtag) {
-      dispatchSuggestion({
+      suggestionDispatch({
         type: 'open tag suggestions',
         payload: potentialHashtag.value
       })
     } else {
-      dispatchSuggestion({ type: 'close tag suggestions' })
+      suggestionDispatch({ type: 'close tag suggestions' })
     }
   }
 
@@ -79,7 +88,21 @@ function useTaggingState(
     additionalPlugins
   )
 
-  return { editorState, suggestionState }
+  return { editorState, suggestionState, suggestionDispatch }
 }
 
+// Get relevant suggestions for the given hashtag under construction.
+function getRelevantSuggestions(
+  value: string,
+  hashtagSuggestions: string[] = []
+) {
+  const inputValue = deburr(value.trim()).toLowerCase()
+  const inputLength = inputValue.length
+  return inputLength === 0
+    ? []
+    : hashtagSuggestions.filter(
+        suggestion =>
+          suggestion.slice(0, inputLength).toLowerCase() === inputValue
+      )
+}
 export { useTaggingState as default, onChangeType }

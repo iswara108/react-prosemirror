@@ -1,24 +1,21 @@
 import * as React from 'react'
-import { Plugin, PluginKey } from 'prosemirror-state'
+import { Node, Schema } from 'prosemirror-model'
+import { EditorState, Plugin } from 'prosemirror-state'
 import { exampleSetup } from 'prosemirror-example-setup'
 import { readOnlyPlugin } from '../plugins/readOnlyPlugin'
-
-import { Node, Schema } from 'prosemirror-model'
-import { EditorState } from 'prosemirror-state'
-
-// controlled component's "onChange" prop type
-export type onChangeType =
-  | ((jsonNode: { [key: string]: any }) => void)
-  | undefined
+import {
+  contentUpdateHookPlugin,
+  onChangeType
+} from '../plugins/contentUpdateHookPlugin'
 
 // create a plugin to fire the onChange event whenever the editorState changes,
 // a read only plugin to deactivate any transaction, and create the editorState.
-export function useProseState(
+function useProseState(
   onChange: onChangeType,
   schema: Schema,
   readOnly: boolean,
   additionalPlugins: Plugin[] = []
-) {
+): EditorState {
   // create a sync plugin which calls a callback prop whenever the view changes.
   // pass ref callback which is updated when the onChange prop is renewed.
   const refOnChange = React.useRef<onChangeType>(onChange)
@@ -32,7 +29,7 @@ export function useProseState(
   const plugins = exampleSetup({ schema })
     .concat(additionalPlugins)
     .concat((readOnly && readOnlyPlugin()) || [])
-    .concat(syncStatePlugin(refOnChange))
+    .concat(contentUpdateHookPlugin(refOnChange))
 
   const doc = createEmptyDocument(schema)
 
@@ -48,20 +45,4 @@ function createEmptyDocument(schema: Schema) {
   })
 }
 
-// fires an "onChange" callback whenever the prosemirror view is updated.
-// this is necessary for controlled components.
-// the "refOnChange" callback must be a mutable object which will hold its
-// reference throughout the component's lifetime because it is passed to the
-// plugin only during intialization.
-function syncStatePlugin(refOnChange: React.MutableRefObject<onChangeType>) {
-  return new Plugin({
-    key: new PluginKey('Sync State Plugin'),
-    view: () => ({
-      update: (view, prevState) => {
-        if (!prevState.doc.eq(view.state.doc)) {
-          refOnChange.current?.(view.state.doc.toJSON())
-        }
-      }
-    })
-  })
-}
+export { useProseState, onChangeType }

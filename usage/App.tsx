@@ -23,6 +23,10 @@ function App() {
     }, 0)
   }, [])
 
+  const [value, setValue] = React.useState<{ [key: string]: any } | null>(
+    taggingDemoContent
+  )
+
   return (
     <>
       <ProseMirror id="prosemirror-multiline" label="" />
@@ -49,7 +53,8 @@ function App() {
       <TaggingEditor
         id="prosemirror-tagging-editor"
         label=""
-        value={taggingDemoContent}
+        value={value}
+        onChange={setValue}
         ref={tagRef}
       />
     </>

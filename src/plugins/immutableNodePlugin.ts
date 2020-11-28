@@ -89,8 +89,7 @@ const createImmutablePlugin = (immutableNodeTypes: string[]) =>
         const correspondingTag = tagsInCurrentState.find(
           tagInCurrentState =>
             tagInCurrentState.pos ===
-            //@ts-ignore
-            transaction.mapping.invert().map(transactionInTag.pos)
+            (transaction.mapping as any).invert().map(transactionInTag.pos)
         )
 
         if (

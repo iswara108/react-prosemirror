@@ -2,11 +2,9 @@ import { Decoration, DecorationSet } from 'prosemirror-view'
 import { Plugin, PluginKey, Selection } from 'prosemirror-state'
 import { Node } from 'prosemirror-model'
 import XRegExp from 'xregexp'
-// import { findEditingHashtag, findAllHashtags } from '../model/taggingUtils'
 
-function decorateHashtags(doc: Node, _selection: Selection) {
+function decoratePotentialTags(doc: Node, _selection: Selection) {
   const allHashtags = findAllHashtags(doc)
-
   return DecorationSet.create(
     doc,
     allHashtags.map(hashtag =>
@@ -18,38 +16,41 @@ function decorateHashtags(doc: Node, _selection: Selection) {
 }
 
 // This plugin serves two purposes:
-// 1. Decorate editing tags (unresolved tags)
+// 1. Decorate potential tags. A potential tag is a tag which is editable,
+//    and can be resolved into an immutable tag.
 // 2. Disables the "enter" key when the cursor is on a tag being edited, designating it to resolving a tag from the list of suggestions
-const hashtagPlugin = new Plugin({
-  key: new PluginKey('Hashtag Plugin'),
+const potentialTagsPlugin = new Plugin({
+  key: new PluginKey('Potential Tag Plugin'),
   state: {
     init(_, instance) {
-      return decorateHashtags(instance.doc, instance.selection)
+      return decoratePotentialTags(instance.doc, instance.selection)
     },
 
     apply(tr, _oldDecoration) {
-      return decorateHashtags(tr.doc, (tr as any).curSelection)
+      return decoratePotentialTags(tr.doc, (tr as any).curSelection)
     }
   },
   props: {
     decorations(editorState) {
       return this.getState(editorState)
-    },
-
-    handleDOMEvents: {
-      keydown: (view, event) => {
-        // In case of a multiline view, disable "Enter" key when a tag is being edited to allow resolving tag via the "Enter" key.
-        if (event.key === 'Enter') {
-          const currentEditingTag = findEditingHashtag(
-            view.state.doc,
-            view.state.selection
-          )
-          if (currentEditingTag) event.preventDefault()
-        }
-        // todo: Maybe return true?
-        return false
-      }
     }
+
+    // disable until suggestions dropdown is implemented
+
+    // handleDOMEvents: {
+    //   keydown: (view, event) => {
+    //     // In case of a multiline view, disable "Enter" key when a tag is being edited to allow resolving tag via the "Enter" key.
+    //     if (event.key === 'Enter') {
+    //       const currentEditingTag = findEditingHashtag(
+    //         view.state.doc,
+    //         view.state.selection
+    //       )
+    //       if (currentEditingTag) event.preventDefault()
+    //     }
+    //     // todo: Maybe return true?
+    //     return false
+    //   }
+    // }
   }
 })
 
@@ -62,8 +63,7 @@ const getTokens = (doc: Node) => {
 
   doc.descendants((node, pos, parent) => {
     // do not consider resolved tag nodes.
-    if (parent.type.name === 'hashtag' || parent.type.name === 'mention')
-      return false // do not recurse over children of a resolved hashtag
+    if (parent.type.name === 'hashtag' || parent.type.name === 'mention') return // do not recurse over children of a resolved hashtag
 
     if (
       !node.isText ||
@@ -71,7 +71,6 @@ const getTokens = (doc: Node) => {
       node.type.name === 'mention'
     )
       return // only handle text nodes which might have a token
-
     const tokenizer = Tokenizer(node.textContent)
 
     const hashtags = tokenizer.hashtags.map(hashtag => ({
@@ -79,6 +78,7 @@ const getTokens = (doc: Node) => {
       end: hashtag.end + pos - 1,
       value: hashtag.value
     }))
+
     const mentions = tokenizer.mentions.map(mention => ({
       start: mention.start + pos - 1,
       end: mention.end + pos - 1,
@@ -130,6 +130,8 @@ const findAllMentions = (doc: Node) => {
   return getTokens(doc).mentions
 }
 
+// TODO: build unit tests and refactor
+
 /**
  * TokenizerJS
  *
@@ -146,7 +148,7 @@ const Tokenizer = (text: string) => {
     mentions: []
   }
 
-  for (var i = 0; i <= text.length; i++) {
+  for (let i = 0; i <= text.length; i++) {
     if (text[i] === '#') {
       var hashtag = Hashtag.parse(i, text)
       if (hashtag instanceof Hashtag) hashtag.value = hashtag.value.slice(1)
@@ -208,10 +210,6 @@ class Token {
  * Hashtag token.
  */
 class Hashtag extends Token {
-  constructor(start: number, value: string) {
-    super(start, value)
-  }
-
   /**
    * Hashtags start with a '#' followed
    * by an series of alphanumeric characters.
@@ -252,10 +250,6 @@ class Hashtag extends Token {
  * Mention token.
  */
 class Mention extends Token {
-  constructor(start: number, value: string) {
-    super(start, value)
-  }
-
   /**
    * Mentions start with a '@' followed
    * by an series of alphanumeric characters.
@@ -292,4 +286,4 @@ class Mention extends Token {
   }
 }
 
-export default hashtagPlugin
+export default potentialTagsPlugin

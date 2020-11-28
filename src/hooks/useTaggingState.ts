@@ -1,7 +1,7 @@
 import { Schema } from 'prosemirror-model'
 import { useProseState, onChangeType } from '../hooks/useProseState'
 import createImmutablePlugin from '../plugins/immutableNodePlugin'
-import hashtagPlugin from '../plugins/tagsUnderConstructionPlugin'
+import potentialTagsPlugin from '../plugins/potentialTagPlugin'
 
 function useTaggingState(
   onChange: onChangeType,
@@ -10,7 +10,7 @@ function useTaggingState(
 ) {
   const additionalPlugins = [
     createImmutablePlugin(['hashtag', 'mention']),
-    hashtagPlugin
+    potentialTagsPlugin
   ]
 
   return useProseState(onChange, schema, readOnly, additionalPlugins)

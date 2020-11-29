@@ -66,7 +66,17 @@ function useTaggingState(
         return { editorState: state.editorState }
       case 'resolve tag':
         console.log('resolved to ', action.payload)
-        return { editorState: state.editorState }
+        const tr = state.editorState.tr
+        tr.insertText(
+          'resolved' + ' ' + action.payload,
+          editorState.selection.head
+        )
+        const newState = EditorState.fromJSON(
+          { schema },
+          state.editorState.toJSON()
+        )
+        newState.apply(tr)
+        return { editorState: newState }
       default:
         throw new Error('case of ' + action.type + ' is not implemented')
     }

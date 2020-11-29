@@ -46,6 +46,16 @@ export function useProseView(
     }
   }, [value, view])
 
+  React.useLayoutEffect(() => {
+    try {
+      console.log('updating view because state changed')
+      // todo: change to apply transaction and replace the contents (instead of recreating the whole state)
+      view?.updateState(state)
+    } catch (e) {
+      console.error(e)
+    }
+  }, [state])
+
   // for forwarding editorView as ref:
   // set the ref object to the prosemirror editorView
   // This will make the editorView accessible to the parent.

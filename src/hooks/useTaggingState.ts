@@ -13,6 +13,11 @@ export type SuggestionStateType = {
   hashtagSuggestions?: string[]
 }
 
+export type TaggingStateType = {
+  editorState: EditorState
+  suggestions?: SuggestionStateType
+}
+
 export type SuggestionActionType =
   | { type: 'open tag suggestions'; payload: string }
   | { type: 'next suggestions' }
@@ -27,34 +32,47 @@ function useTaggingState(
   readOnly: boolean,
   hashtags?: string[]
 ): {
-  editorState: EditorState
-  suggestionState: SuggestionStateType
+  taggingState: TaggingStateType
   suggestionDispatch: React.Dispatch<SuggestionActionType>
 } {
-  const initialSuggestionState = {}
+  const additionalPlugins = [
+    createImmutablePlugin(['hashtag', 'mention']),
+    potentialTagsPlugin,
+    stateUpdateHookPlugin(updateTagSuggestions)
+  ]
 
+  const editorState = useProseState(
+    onChange,
+    schema,
+    readOnly,
+    additionalPlugins
+  )
+
+  const initialSuggestionState = { editorState }
   function suggestionReducer(
-    state: SuggestionStateType,
+    state: TaggingStateType,
     action: SuggestionActionType
-  ): SuggestionStateType {
+  ): TaggingStateType {
     switch (action.type) {
       case 'open tag suggestions':
         return {
           ...state,
-          potentialTag: action.payload,
-          hashtagSuggestions: getRelevantSuggestions(action.payload, hashtags)
+          suggestions: {
+            potentialTag: action.payload,
+            hashtagSuggestions: getRelevantSuggestions(action.payload, hashtags)
+          }
         }
       case 'close tag suggestions':
-        return {}
+        return { editorState: state.editorState }
       case 'resolve tag':
         console.log('resolved to ', action.payload)
-        return {}
+        return { editorState: state.editorState }
       default:
         throw new Error('case of ' + action.type + ' is not implemented')
     }
   }
 
-  const [suggestionState, suggestionDispatch] = React.useReducer(
+  const [taggingState, suggestionDispatch] = React.useReducer(
     suggestionReducer,
     initialSuggestionState
   )
@@ -75,20 +93,7 @@ function useTaggingState(
     }
   }
 
-  const additionalPlugins = [
-    createImmutablePlugin(['hashtag', 'mention']),
-    potentialTagsPlugin,
-    stateUpdateHookPlugin(updateTagSuggestions)
-  ]
-
-  const editorState = useProseState(
-    onChange,
-    schema,
-    readOnly,
-    additionalPlugins
-  )
-
-  return { editorState, suggestionState, suggestionDispatch }
+  return { taggingState, suggestionDispatch }
 }
 
 // Get relevant suggestions for the given hashtag under construction.

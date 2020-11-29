@@ -57,15 +57,16 @@ const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
     const defaultTaggingSchema = useTaggingSchema()
     const schema = props.schema || defaultTaggingSchema
 
-    const {
-      editorState,
-      suggestionState,
-      suggestionDispatch
-    } = useTaggingState(onChange, schema, !!readOnly, hashtags)
+    const { taggingState, suggestionDispatch } = useTaggingState(
+      onChange,
+      schema,
+      !!readOnly,
+      hashtags
+    )
 
     const contentEditableDom = useProseView(
       value,
-      editorState,
+      taggingState.editorState,
       ref as React.MutableRefObject<EditorView>
     )
 
@@ -74,9 +75,9 @@ const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
     return (
       <>
         <StyledDiv id={id} ref={contentEditableDom} {...restProps}></StyledDiv>
-        {suggestionState.hashtagSuggestions && (
+        {taggingState.suggestions?.hashtagSuggestions && (
           <Suggestions
-            suggestionState={suggestionState}
+            suggestionState={taggingState.suggestions}
             suggestionDispatch={suggestionDispatch}
           />
         )}

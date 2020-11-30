@@ -63,6 +63,9 @@ const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
       !!readOnly,
       hashtags
     )
+    React.useEffect(() => {
+      console.log('state changed to ', JSON.stringify(taggingState.editorState))
+    }, [taggingState.editorState])
 
     const contentEditableDom = useProseView(
       value,
@@ -74,6 +77,13 @@ const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
     // and this has nothing to do with the "ref" forwarded from the parent.
     return (
       <>
+        <button
+          onClick={() =>
+            suggestionDispatch({ type: 'resolve tag', payload: 'hello' })
+          }
+        >
+          Resolve text into prosemirror
+        </button>
         <StyledDiv id={id} ref={contentEditableDom} {...restProps}></StyledDiv>
         {taggingState.suggestions?.hashtagSuggestions && (
           <Suggestions

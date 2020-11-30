@@ -24,6 +24,20 @@ export function useProseView(
     }
   }, [view, state])
 
+  // todo: this works but it also works unintentionally on first render when the state is empty. See why that is and how to go around it
+  React.useEffect(() => {
+    if (
+      view &&
+      state &&
+      JSON.stringify(state) !== JSON.stringify(view.state) &&
+      state.doc.toString().includes('is a')
+    ) {
+      console.log('prev state: ', JSON.stringify(view.state))
+      console.log('next state: ', JSON.stringify(state))
+      view.updateState(state)
+    }
+  }, [view, state])
+
   // for a controlled prop:
   // refresh the view with a new state whenever the value prop changes
   React.useLayoutEffect(() => {

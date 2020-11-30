@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Schema } from 'prosemirror-model'
+import { Schema, Node } from 'prosemirror-model'
 import { EditorState } from 'prosemirror-state'
 import deburr from 'lodash/deburr'
 import { useProseState, onChangeType } from '../hooks/useProseState'
@@ -65,8 +65,34 @@ function useTaggingState(
       case 'close tag suggestions':
         return { editorState: state.editorState }
       case 'resolve tag':
-        console.log('resolved to ', action.payload)
-        return { editorState: state.editorState }
+        return {
+          editorState: EditorState.create({
+            doc: Node.fromJSON(state.editorState.schema, {
+              type: 'doc',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    { type: 'text', text: 'here is a ' },
+                    {
+                      type: 'hashtag',
+                      content: [{ type: 'text', text: '#office' }]
+                    },
+                    { type: 'text', text: ' and here is a ' },
+                    {
+                      type: 'mention',
+                      content: [{ type: 'text', text: '@mention' }]
+                    },
+                    { type: 'text', text: ' ' }
+                  ]
+                }
+              ]
+            }),
+            plugins: state.editorState.plugins
+          })
+        }
+      // console.log('resolved to ', action.payload)
+      // return { editorState: state.editorState }
       default:
         throw new Error('case of ' + action.type + ' is not implemented')
     }

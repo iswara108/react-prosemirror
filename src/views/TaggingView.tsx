@@ -8,7 +8,6 @@ import { onChangeType } from '../hooks/useProseState'
 import { useProseView } from '../hooks/useProseView'
 import useTaggingState from '../hooks/useTaggingState'
 import { Suggestions } from './Suggestions'
-import usePrevious from 'use-previous'
 
 const StyledDiv = styled.div`
   .editing-hashtag {
@@ -59,24 +58,14 @@ const TaggingView = React.forwardRef<EditorView, TaggingViewProps>(
     const schema = props.schema || defaultTaggingSchema
 
     const { taggingState, suggestionDispatch } = useTaggingState(
+      value,
       onChange,
       schema,
       !!readOnly,
       hashtags
     )
 
-    const prevState = usePrevious(taggingState.editorState)
-
-    React.useEffect(() => {
-      console.log('state changed from ', JSON.stringify(prevState))
-      console.log(
-        'state changed to   ',
-        JSON.stringify(taggingState.editorState)
-      )
-    }, [taggingState.editorState, prevState])
-
     const contentEditableDom = useProseView(
-      value,
       taggingState.editorState,
       ref as React.MutableRefObject<EditorView>
     )

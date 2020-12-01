@@ -11,6 +11,7 @@ import {
 // create a plugin to fire the onChange event whenever the editorState changes,
 // a read only plugin to deactivate any transaction, and create the editorState.
 function useProseState(
+  value: { [key: string]: any } | null | undefined,
   onChange: onChangeType,
   schema: Schema,
   readOnly: boolean,
@@ -31,7 +32,8 @@ function useProseState(
     .concat((readOnly && readOnlyPlugin()) || [])
     .concat(contentUpdateHookPlugin(refOnChange))
 
-  const doc = createEmptyDocument(schema)
+  const doc =
+    (value && Node.fromJSON(schema, value)) || createEmptyDocument(schema)
 
   const editorState = EditorState.create({ schema, doc, plugins })
   return editorState

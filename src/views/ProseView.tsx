@@ -21,10 +21,9 @@ const ProseView = React.forwardRef<EditorView, ProseViewProps>(
     const defaultSchema = useDefaultSchema()
     const schema = props.schema || defaultSchema
 
-    const editorState = useProseState(onChange, schema, !!readOnly)
+    const editorState = useProseState(value, onChange, schema, !!readOnly)
 
     const contentEditableDom = useProseView(
-      value,
       editorState,
       ref as React.MutableRefObject<EditorView>
     )

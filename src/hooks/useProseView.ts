@@ -22,12 +22,11 @@ export function useProseView(
     }
   }, [view, state])
 
-  // todo: this works but it also works unintentionally on first render when the state is empty. See why that is and how to go around it
   React.useLayoutEffect(() => {
     if (view && state) {
-      console.log('prev state: ', JSON.stringify(view.state))
-      console.log('next state: ', JSON.stringify(state))
-      view.updateState(state)
+      if (!view.state.doc.eq(state.doc)) {
+        view.updateState(state)
+      }
     }
   }, [view, state])
 

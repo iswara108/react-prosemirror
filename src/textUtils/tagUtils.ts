@@ -49,25 +49,19 @@ const getTokens = (doc: Node) => {
 // }
 const findEditingHashtag = (doc: Node, selection: Selection) => {
   const tokens = getTokens(doc)
-  const lowestSelection = Math.min(selection.anchor, selection.head)
-  const highestSelection = Math.max(selection.anchor, selection.head)
 
   return tokens.hashtags.find(
     hashtag =>
-      hashtag.start + 1 <= lowestSelection &&
-      hashtag.end + 1 >= highestSelection
+      hashtag.start + 1 <= selection.from && hashtag.end + 1 >= selection.to
   )
 }
 
 const findEditingMention = (doc: Node, selection: Selection) => {
   const tokens = getTokens(doc)
-  const lowestSelection = Math.min(selection.anchor, selection.head)
-  const highestSelection = Math.max(selection.anchor, selection.head)
 
   return tokens.mentions.find(
     mention =>
-      mention.start + 1 <= lowestSelection &&
-      mention.end + 1 >= highestSelection
+      mention.start + 1 <= selection.from && mention.end + 1 >= selection.to
   )
 }
 

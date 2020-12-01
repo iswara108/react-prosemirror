@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Schema, Node } from 'prosemirror-model'
+import { Schema } from 'prosemirror-model'
 import { EditorState } from 'prosemirror-state'
 import deburr from 'lodash/deburr'
 import { useProseState, onChangeType } from '../hooks/useProseState'

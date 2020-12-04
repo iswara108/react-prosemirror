@@ -137,7 +137,7 @@ describe('test default rich text box', () => {
 
     it('copies text automatically from one component to another', () => {
       cy.get('@controlled-1')
-        .type('text')
+        .type('{selectall}text')
         .contains(/^text$/)
       cy.get('@controlled-2').contains(/^text$/)
 
@@ -149,14 +149,19 @@ describe('test default rich text box', () => {
 
     it('disabled-text component is updated but cannot change itself', () => {
       cy.get('@controlled-1')
-        .type('text')
-        .contains(/^text$/)
-      cy.get('@controlled-3').contains(/^text$/)
+        .contains(/^I am an initial text.$/)
+        .type('{end} which has been updated.')
+        .contains(/^I am an initial text. which has been updated.$/)
+      cy.get('@controlled-3').contains(
+        /^I am an initial text. which has been updated.$/
+      )
 
       cy.get('@controlled-3')
         .type('{end} 123')
-        .contains(/^text$/)
-      cy.get('@controlled-1').contains(/^text$/)
+        .contains(/^I am an initial text. which has been updated.$/)
+      cy.get('@controlled-1').contains(
+        /^I am an initial text. which has been updated.$/
+      )
     })
   })
 

@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-
+/// <reference path="./index.d.ts"/>
 /**
  * Credits
  * @Bkucera: https://github.com/cypress-io/cypress/issues/2839#issuecomment-447012818
@@ -53,7 +53,7 @@ Cypress.Commands.add(
   'setSelection',
   { prevSubject: true },
   (subject, query, endQuery) => {
-    return cy.wrap(subject).selection($el => {
+    return cy.wrap(subject).selection(($el: JQuery<Element>) => {
       if (typeof query === 'string') {
         const anchorNode = getTextNode($el[0], query)
         const focusNode = endQuery ? getTextNode($el[0], endQuery) : anchorNode
@@ -64,12 +64,18 @@ Cypress.Commands.add(
         setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset)
       } else if (typeof query === 'object') {
         const el = $el[0]
-        const anchorNode = getTextNode(el.querySelector(query.anchorQuery))
+        const anchorNode =
+          typeof query.anchorQuery === 'string'
+            ? getTextNode(el.querySelector(query.anchorQuery))
+            : query.anchorNode
         const anchorOffset = query.anchorOffset || 0
-        const focusNode = query.focusQuery
+        const focusNode = query.focusNode
+          ? query.focusNode
+          : typeof query.focusQuery === 'string'
           ? getTextNode(el.querySelector(query.focusQuery))
           : anchorNode
         const focusOffset = query.focusOffset || 0
+        console.log(anchorNode, anchorOffset, focusNode, focusOffset)
         setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset)
       }
     })
@@ -80,7 +86,7 @@ Cypress.Commands.add(
 Cypress.Commands.add(
   'setCursor',
   { prevSubject: true },
-  (subject, query, atStart) => {
+  (subject, query: string, atStart: boolean) => {
     return cy.wrap(subject).selection($el => {
       const node = getTextNode($el[0], query)
       const offset =
@@ -111,7 +117,8 @@ Cypress.Commands.add(
 )
 
 // Helper functions
-function getTextNode(el, match) {
+
+function getTextNode(el: Node, match?: string): Text {
   const walk = window.document.createTreeWalker(
     el,
     NodeFilter.SHOW_TEXT,
@@ -119,12 +126,11 @@ function getTextNode(el, match) {
     false
   )
   if (!match) {
-    return walk.nextNode()
+    return walk.nextNode() as Text
   }
 
-  const nodes = []
-  let node
-  while ((node = walk.nextNode())) {
+  let node: Text
+  while ((node = walk.nextNode() as Text)) {
     if (node.wholeText.includes(match)) {
       return node
     }

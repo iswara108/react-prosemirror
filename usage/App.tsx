@@ -1,82 +1,134 @@
 import * as React from 'react'
 import 'prosemirror-menu/style/menu.css'
-import ReactProseMirror from '../src'
+import {
+  ProseMirror,
+  useProseState,
+  useTaggingState,
+  TaggingEditor
+} from '../src'
+
 import { useDefaultSchema } from '../src/schemas/defaultSchema'
-import { unchangedTextDemoContent } from './lib/demoInitialContents'
+import {
+  standardTextDemoContent,
+  taggingDemoContent,
+  unchangedTextDemoContent
+} from './lib/demoInitialContents'
 import { EditorView } from 'prosemirror-view'
+import applyDevTools from 'prosemirror-dev-tools'
+import { useTaggingSchema } from '../src/schemas/taggingSchema'
 
 function App() {
   const singlelineSchema = useDefaultSchema({ multiline: false })
   const noMarksSchema = useDefaultSchema({ disableMarks: true })
+  const tagRef = React.createRef<EditorView>()
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      if (tagRef.current) applyDevTools(tagRef.current)
+      ;(window as Window & {
+        tagView?: EditorView
+      }).tagView = tagRef.current!
+    }, 0)
+  }, [])
+
+  const unchangedTextDemo = useProseState({
+    schema: singlelineSchema,
+    initialValue: unchangedTextDemoContent
+  })
+
+  const defaultTaggingSchema = useTaggingSchema()
+
+  const {
+    taggingState: { editorState },
+    suggestionDispatch
+  } = useTaggingState({
+    schema: defaultTaggingSchema,
+    initialValue: taggingDemoContent
+  })
 
   return (
     <>
-      <ReactProseMirror id="prosemirror-multiline" label="" />
-      <ReactProseMirror
+      <ProseMirror id="prosemirror-multiline" label="" />
+      <ProseMirror
         id="prosemirror-singleline"
         label=""
         schema={singlelineSchema}
       />
-      <ReactProseMirror
+      <ProseMirror
         id="prosemirror-no-marks-multiline"
         label=""
         schema={noMarksSchema}
       />
 
-      <ReactProseMirror
+      <ProseMirror
         id="prosemirror-disable-edit"
         label=""
+        initialValue={unchangedTextDemoContent}
         readOnly
-        value={unchangedTextDemoContent}
       />
 
       <ControlledMirros />
-      <UncontrolledComponentWithRef />
+      <ComponentWithRef />
+      <TaggingEditor
+        id="prosemirror-tagging-editor"
+        label=""
+        initialValue={taggingDemoContent}
+        ref={tagRef}
+        state={editorState}
+        hashtags={['#computer', '#office']}
+      />
     </>
   )
 }
 
-function UncontrolledComponentWithRef() {
+function ComponentWithRef() {
   const editorViewRef = React.createRef<EditorView>()
 
   React.useEffect(() => {
     setTimeout(() => {
-      ;(window as any).editorView = editorViewRef.current!
+      ;(window as Window & {
+        editorView?: EditorView
+      }).editorView = editorViewRef.current!
     }, 0)
-  }, [])
+  }, [editorViewRef])
 
-  return <ReactProseMirror id="prosemirror-ref" label="" ref={editorViewRef} />
+  return <ProseMirror id="prosemirror-ref" label="" ref={editorViewRef} />
 }
 
 function ControlledMirros() {
-  const [value, setValue] = React.useState<{ [key: string]: any } | null>(null)
   const schema = useDefaultSchema()
+  const { editorState, setEditorState } = useProseState({
+    schema,
+    initialValue: standardTextDemoContent
+  })
+
   React.useEffect(
-    () => console.log("controlled mirrored components' value changed: ", value),
-    [value]
+    () =>
+      console.log(
+        "controlled mirrored components' state changed: ",
+        JSON.stringify(editorState.doc)
+      ),
+    [editorState]
   )
+  console.log('set state', setEditorState)
 
   return (
     <>
-      <ReactProseMirror
+      <ProseMirror
         id="prosemirror-controlled-1"
         label="controlled-component"
-        value={value}
-        schema={schema}
-        onChange={setValue}
+        state={editorState}
       />
-      <ReactProseMirror
+      <ProseMirror
         id="prosemirror-controlled-2"
         label="controlled-component"
-        value={value}
-        schema={schema}
-        onChange={setValue}
+        state={editorState}
       />
-      <ReactProseMirror
+      read only:
+      <ProseMirror
         id="prosemirror-controlled-3"
         label="controlled-component"
-        value={value}
-        schema={schema}
+        state={editorState}
         readOnly
       />
     </>

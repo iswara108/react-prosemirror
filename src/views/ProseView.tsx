@@ -1,62 +1,61 @@
 import * as React from 'react'
-import { EditorView } from 'prosemirror-view'
-import 'prosemirror-view/style/prosemirror.css'
-import { Node, Schema } from 'prosemirror-model'
+import { Schema } from 'prosemirror-model'
 import { EditorState } from 'prosemirror-state'
-import { exampleSetup } from 'prosemirror-example-setup'
+import { EditorView } from 'prosemirror-view'
 import { useDefaultSchema } from '../schemas/defaultSchema'
-import { onChangeType } from '../plugins/syncStatePlugin'
+import { useProseState } from '../hooks/useProseState'
+import { useProseView } from '../hooks/useProseView'
 import { readOnlyPlugin } from '../plugins/readOnlyPlugin'
-import { useControlled } from '../hooks/controlled'
-import useRefEditorView from '../hooks/EditorViewRef'
 
 export type ProseViewProps = {
   id: string
   label: string
-  value?: { [key: string]: any } | null
-  onChange?: onChangeType
+  initialValue?: { [key: string]: any } // toJSON extract of a prosemirror Node.
   schema?: Schema
   readOnly?: boolean
+  state?: EditorState
 }
 
 const ProseView = React.forwardRef<EditorView, ProseViewProps>(
   function ProseView(props, ref) {
-    const { id, value, onChange, readOnly, ...restProps } = props
-    const [view, setView] = React.useState<EditorView>()
-    const contentEditableDom = React.useRef(document.createElement('div'))
+    const {
+      id,
+      initialValue,
+      state: stateFromProps,
+      readOnly,
+      ...restProps
+    } = props
+
     const defaultSchema = useDefaultSchema()
     const schema = props.schema || defaultSchema
 
-    const syncStatePlugin = useControlled(value, onChange, view, schema)
-    useRefEditorView(ref as React.MutableRefObject<EditorView>, view)
+    const { editorState: defaultEditorState } = useProseState({
+      initialValue,
+      schema
+    })
 
-    // initialize view with state
-    React.useLayoutEffect(() => {
-      if (!view) {
-        const doc = createEmptyDocument(schema)
-        const plugins = exampleSetup({ schema: schema })
-          .concat((readOnly && readOnlyPlugin()) || [])
-          .concat(syncStatePlugin)
+    // use either the default state or the one passed through props.
+    const editorState = stateFromProps || defaultEditorState
 
-        setView(
-          new EditorView(contentEditableDom.current, {
-            state: EditorState.create({ schema, doc, plugins })
+    // create a cloned state if the readOnly prop is passed.
+    // This is useful to have multiple controlled components sharing state,
+    // while the read-only-plugin can be set differently for each component.
+    const editorStateWithReadOnlyOption =
+      editorState && readOnly
+        ? editorState.reconfigure({
+            plugins: editorState.plugins.concat(readOnlyPlugin())
           })
-        )
-      }
-    }, [view, syncStatePlugin, schema, readOnly])
+        : editorState
+
+    const contentEditableDom = useProseView(
+      editorStateWithReadOnlyOption,
+      ref as React.MutableRefObject<EditorView>
+    )
 
     // Note: In the below line, contentEditableDom is set as ref of the div
     // and this has nothing to do with the "ref" forwarded from the parent.
     return <div id={id} ref={contentEditableDom} {...restProps}></div>
   }
 )
-
-export function createEmptyDocument(schema: Schema) {
-  return Node.fromJSON<Schema>(schema, {
-    type: 'doc',
-    content: [{ type: 'paragraph' }]
-  })
-}
 
 export default ProseView

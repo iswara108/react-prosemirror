@@ -48,21 +48,12 @@ function App() {
 
   return (
     <>
-      <ProseMirror id="prosemirror-multiline" label="" />
-      <ProseMirror
-        id="prosemirror-singleline"
-        label=""
-        schema={singlelineSchema}
-      />
-      <ProseMirror
-        id="prosemirror-no-marks-multiline"
-        label=""
-        schema={noMarksSchema}
-      />
+      <ProseMirror id="prosemirror-multiline" />
+      <ProseMirror id="prosemirror-singleline" schema={singlelineSchema} />
+      <ProseMirror id="prosemirror-no-marks-multiline" schema={noMarksSchema} />
 
       <ProseMirror
         id="prosemirror-disable-edit"
-        label=""
         initialValue={unchangedTextDemoContent}
         readOnly
       />
@@ -71,7 +62,6 @@ function App() {
       <ComponentWithRef />
       <TaggingEditor
         id="prosemirror-tagging-editor"
-        label=""
         initialValue={taggingDemoContent}
         ref={tagRef}
         state={editorState}
@@ -92,15 +82,16 @@ function ComponentWithRef() {
     }, 0)
   }, [editorViewRef])
 
-  return <ProseMirror id="prosemirror-ref" label="" ref={editorViewRef} />
+  return <ProseMirror id="prosemirror-ref" ref={editorViewRef} />
 }
 
 function ControlledMirros() {
   const schema = useDefaultSchema()
-  const { editorState, setEditorState } = useProseState({
+  const { editorState } = useProseState({
     schema,
     initialValue: standardTextDemoContent
   })
+  const { editorState: noIDEditorState } = useProseState({ schema })
 
   React.useEffect(
     () =>
@@ -110,27 +101,16 @@ function ControlledMirros() {
       ),
     [editorState]
   )
-  console.log('set state', setEditorState)
 
   return (
     <>
-      <ProseMirror
-        id="prosemirror-controlled-1"
-        label="controlled-component"
-        state={editorState}
-      />
-      <ProseMirror
-        id="prosemirror-controlled-2"
-        label="controlled-component"
-        state={editorState}
-      />
+      <ProseMirror id="prosemirror-controlled-1" state={editorState} />
+      <ProseMirror id="prosemirror-controlled-2" state={editorState} />
       read only:
-      <ProseMirror
-        id="prosemirror-controlled-3"
-        label="controlled-component"
-        state={editorState}
-        readOnly
-      />
+      <ProseMirror id="prosemirror-controlled-3" state={editorState} readOnly />
+      <div id="no-id">
+        <ProseMirror state={noIDEditorState} />
+      </div>
     </>
   )
 }

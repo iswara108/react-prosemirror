@@ -8,8 +8,7 @@ import { useProseView } from '../hooks/useProseView'
 import { readOnlyPlugin } from '../plugins/readOnlyPlugin'
 
 export type ProseViewProps = {
-  id: string
-  label: string
+  id?: string
   initialValue?: { [key: string]: any } // toJSON extract of a prosemirror Node.
   schema?: Schema
   readOnly?: boolean
